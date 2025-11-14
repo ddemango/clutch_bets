@@ -1,0 +1,35 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  slips     Slip[]
+}
+
+model Slip {
+  id            String    @id @default(uuid())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String
+  league        League
+  screenshotUrl String
+  rawText       String     @default("")
+  parsedJson    Json
+  analyses      Analysis[]
+  createdAt     DateTime @default(now())
+}
+
+model Analysis {
+  id              String   @id @default(uuid())
+  slip            Slip     @relation(fields: [slipId], references: [id])
+  slipId          String
+  tier            Tier?
+  model           String
+  promptVersion   String
+  contentMarkdown String
+  createdAt       DateTime @default(now())
+}
+
+enum League { NFL CFB CBB NHL NBA MLB }
+enum Tier { SAFE BALANCED UPSIDE HEDGE }
